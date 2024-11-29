@@ -8,7 +8,6 @@ This script outputs for various queries the top 5 most similar sentences in the 
 """
 
 import torch
-import read_PDF
 
 from sentence_transformers import SentenceTransformer
 
@@ -24,8 +23,7 @@ corpus = [
     "Two men pushed carts through the woods.",
     "A man is riding a white horse on an enclosed ground.",
     "A monkey is playing drums.",
-    "A cheetah is running behind its prey.",
-    "An Acinonyx jubatus pursues the animal it intends to eat for dinner accross a clearing."
+    "A cheetah is running behind its prey."
 ]
 # Use "convert_to_tensor=True" to keep the tensors on GPU (if available)
 corpus_embeddings = embedder.encode(corpus, convert_to_tensor=True)
@@ -41,6 +39,8 @@ queries = [
 top_k = min(5, len(corpus))
 for query in queries:
     query_embedding = embedder.encode(query, convert_to_tensor=True)
+
+    print(query_embedding)
 
     # We use cosine-similarity and torch.topk to find the highest 5 scores
     similarity_scores = embedder.similarity(query_embedding, corpus_embeddings)[0]
