@@ -8,6 +8,7 @@ if __name__ == "__main__":
     # for line in file.readlines():
     #     print(line)
     reader = PdfReader("pdf_files/example.pdf")
+    destination = open("corpus.txt", "w")
     num_pages = len(reader.pages)
 
     text = ""
@@ -15,4 +16,9 @@ if __name__ == "__main__":
         page = reader.pages[page_num]
         text += page.extract_text()
 
-    print(text)
+        curr_contents = text.split(".")
+        curr_contents = [sentence.replace("\n", " ") for sentence in curr_contents]
+        [destination.write(sentence.strip() + "\n") for sentence in curr_contents]
+        
+
+    #print(text)
