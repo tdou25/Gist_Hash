@@ -1,2 +1,4 @@
-# Gist_Hash
-A program to
+# Gist Hash!
+**Semantics, Semantics**
+
+Gist Hash is an open source PDF readers and search engine.
