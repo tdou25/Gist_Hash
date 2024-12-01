@@ -1,20 +1,9 @@
-"""
-This is a simple application for sentence embeddings: semantic search
-
-We have a corpus with various sentences. Then, for a given query sentence,
-we want to find the most similar sentence in this corpus.
-
-This script outputs for various queries the top 5 most similar sentences in the corpus.
-"""
-
 import torch
-
 from sentence_transformers import SentenceTransformer
-
 from pypdf import PdfReader
 
 
-def build_corpus(pdf_name):
+def build_corpus(pdf_name, glue_level = 3):
     reader = PdfReader("pdf_files/"+pdf_name)
     #destination = open("corpus.txt", "w")
     num_pages = len(reader.pages)
@@ -23,38 +12,38 @@ def build_corpus(pdf_name):
     contents = list()
     for page_num in range(num_pages):
         page = reader.pages[page_num]
-        text += page.extract_text()
 
-        curr_contents = text.split(".")
-        curr_contents = [sentence.replace("\n", " ") for sentence in curr_contents]
-        #[destination.write(sentence.strip() + "\n") for sentence in curr_contents]
-        contents += curr_contents
+        text = page.extract_text()
+
+        sentences = text.split(".")
+
+        temp_string = ""
+        curr_page_contents = list()
+        for i in range(len(sentences)):
+            sentences[i].replace("\n", " ")
+            temp_string += sentences[i] + "."
+            i += 1
+            if(i % glue_level == 0 or page_num == len(sentences)):
+                curr_page_contents.append(temp_string)
+                temp_string = ""
+
+
+        contents += curr_page_contents
     
-    return curr_contents
+    return contents
 
 if __name__ == "__main__":
-    embedder = SentenceTransformer("all-MiniLM-L6-v2")
+    embedder = SentenceTransformer("multi-qa-distilbert-cos-v1")
 
-    # Corpus with example sentences
-    corpus = [
-        "A man is eating food.",
-        "A man is eating a piece of bread.",
-        "The girl is carrying a baby.",
-        "A man is riding a horse.",
-        "A woman is playing violin.",
-        "Two men pushed carts through the woods.",
-        "A man is riding a white horse on an enclosed ground.",
-        "A monkey is playing drums.",
-        "A cheetah is running behind its prey."
-    ]
-    # Use "convert_to_tensor=True" to keep the tensors on GPU (if available)
+    corpus = build_corpus("example.pdf")
+
     corpus_embeddings = embedder.encode(corpus, convert_to_tensor=True)
 
     # Query sentences:
     queries = [
-        "A man is eating pasta.",
-        "Someone in a gorilla costume is playing a set of drums.",
-        "A cheetah chases prey on across a field.",
+        "The worker generates some amount of money, but brings home less than he generated, the remainder going to the boss",
+        "boss makes a dollar, I make a time, so I shit on company time",
+        "what the sigma"
     ]
 
     # Find the closest 5 sentences of the corpus for each query sentence based on cosine similarity
@@ -62,7 +51,7 @@ if __name__ == "__main__":
     for query in queries:
         query_embedding = embedder.encode(query, convert_to_tensor=True)
 
-        print(query_embedding)
+        #print(query_embedding)
 
         # We use cosine-similarity and torch.topk to find the highest 5 scores
         similarity_scores = embedder.similarity(query_embedding, corpus_embeddings)[0]
