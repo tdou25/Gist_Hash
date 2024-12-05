@@ -23,7 +23,7 @@ def build_corpus(pdf_name, glue_level = 3):
             sentences[i].replace("\n", " ")
             temp_string += sentences[i] + "."
             i += 1
-            if(i % glue_level == 0 or page_num == len(sentences)):
+            if(i % glue_level == 0 or i == len(sentences)):
                 curr_page_contents.append(temp_string)
                 temp_string = ""
 
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     # Query sentences:
     queries = [
         "The worker generates some amount of money, but brings home less than he generated, the remainder going to the boss",
-        "boss makes a dollar, I make a time, so I shit on company time",
+        "boss makes a dollar, I make a dime, so I shit on company time",
         "what the sigma"
     ]
 
@@ -56,12 +56,17 @@ if __name__ == "__main__":
         # We use cosine-similarity and torch.topk to find the highest 5 scores
         similarity_scores = embedder.similarity(query_embedding, corpus_embeddings)[0]
         scores, indices = torch.topk(similarity_scores, k=top_k)
+        print("**********************************************************************")
 
         print("\nQuery:", query)
         print("Top 5 most similar sentences in corpus:")
 
         for score, idx in zip(scores, indices):
+            print("---------------------------------------------------------------------------------------------------")
             print(corpus[idx], f"(Score: {score:.4f})")
+            print("---------------------------------------------------------------------------------------------------")
+        
+        print("**********************************************************************")
 
         """
         # Alternatively, we can also use util.semantic_search to perform cosine similarty + topk
